@@ -1,0 +1,28 @@
+driver:
+  kind: modern_ebpf
+
+falco:
+  jsonOutput: true
+  jsonIncludeOutputProperty: true
+  httpOutput:
+    enabled: false
+
+falcosidekick:
+  enabled: true
+  config:
+    webhook:
+      address: http://falcosidekick-ui.falco:2801
+
+customRules:
+  devsecops-secure-nginx-platform: |-
+    - rule: Unexpected Shell In Nginx Container
+      desc: Detect a shell being executed in the hardened NGINX container
+      condition: >
+        container and
+        k8s.ns.name=devsecops-secure-nginx and
+        k8s.pod.label.app_kubernetes_io_name=devsecops-secure-nginx-platform and
+        proc.name in (bash, sh, ash, zsh)
+      output: >
+        Unexpected shell in NGINX container
+        (user=%user.name command=%proc.cmdline container=%container.id pod=%k8s.pod.name)
+      priority: WARNING

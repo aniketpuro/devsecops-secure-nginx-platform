@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: devsecops-platform
+  namespace: argocd
+spec:
+  description: Secure delivery project for the NGINX platform
+  sourceRepos:
+    - http://host.docker.internal:8000/devsecops-secure-nginx-platform.git
+  destinations:
+    - namespace: devsecops-secure-nginx
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  roles:
+    - name: read-only
+      description: Read-only access to application state
+      policies:
+        - p, proj:devsecops-platform:read-only, applications, get, devsecops-platform/*, allow
+      groups:
+        - argocd-readers

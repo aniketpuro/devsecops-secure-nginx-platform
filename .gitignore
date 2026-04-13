@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+.vscode/
+.env
+dist/
+coverage/
+sbom/
+tmp/
+*.log

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devsecops-secure-nginx-platform
+  namespace: argocd
+spec:
+  project: devsecops-platform
+  source:
+    repoURL: http://host.docker.internal:8000/devsecops-secure-nginx-platform.git
+    targetRevision: main
+    path: helm/devsecops-secure-nginx-platform
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devsecops-secure-nginx
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+      - PrunePropagationPolicy=foreground
+      - ApplyOutOfSyncOnly=true
+  revisionHistoryLimit: 10

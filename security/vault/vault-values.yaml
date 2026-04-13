@@ -1,0 +1,41 @@
+global:
+  enabled: true
+
+server:
+  dev:
+    enabled: false
+  dataStorage:
+    enabled: true
+    size: 5Gi
+    storageClass: standard
+  auditStorage:
+    enabled: true
+    size: 5Gi
+    storageClass: standard
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+      api_addr = "http://vault.vault.svc.cluster.local:8200"
+      cluster_addr = "http://vault.vault.svc.cluster.local:8201"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+injector:
+  enabled: true
+
+ui:
+  enabled: true

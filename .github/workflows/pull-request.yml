@@ -1,0 +1,96 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: read
+  security-events: write
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  VERSION: ${{ vars.APP_VERSION || '1.0.0' }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive build metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${VERSION}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Test static content
+        run: ./scripts/test.sh
+
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: security/semgrep.yml
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_CONFIG: security/gitleaks.toml
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build container image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          push: false
+          tags: |
+            local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.image_tag }}
+            local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.short_sha }}
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.image_tag }}
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ steps.meta.outputs.image_tag }}
+          path: sbom.cdx.json
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.image_tag }}
+          format: table
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          exit-code: "1"

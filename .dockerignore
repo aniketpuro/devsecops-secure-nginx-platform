@@ -1,0 +1,10 @@
+.git
+.github
+monitoring
+security
+scripts
+helm
+kubernetes
+argocd
+README.md
+Makefile

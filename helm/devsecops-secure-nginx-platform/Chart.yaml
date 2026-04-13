@@ -1,0 +1,6 @@
+apiVersion: v2
+name: devsecops-secure-nginx-platform
+description: Hardened NGINX application with production-grade security controls
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

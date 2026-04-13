@@ -1,0 +1,30 @@
+rules:
+  - id: no-privileged-kubernetes-workloads
+    message: Privileged containers are not allowed.
+    severity: ERROR
+    languages:
+      - yaml
+    pattern-regex: '(?m)^\s*privileged:\s*true\s*$'
+    paths:
+      include:
+        - kubernetes/*.yaml
+        - helm/**/*.yaml
+
+  - id: no-privilege-escalation
+    message: Containers must disable privilege escalation.
+    severity: ERROR
+    languages:
+      - yaml
+    pattern-regex: '(?m)^\s*allowPrivilegeEscalation:\s*true\s*$'
+    paths:
+      include:
+        - kubernetes/*.yaml
+        - helm/**/*.yaml
+
+  - id: no-latest-image-tags
+    message: Immutable image tags are required; avoid latest tags.
+    severity: ERROR
+    languages:
+      - yaml
+      - dockerfile
+    pattern-regex: '(:latest\b)'

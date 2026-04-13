@@ -1,0 +1,130 @@
+name: Release Secure Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  security-events: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      VERSION: ${{ vars.APP_VERSION || '1.0.0' }}
+      IMAGE_REPOSITORY: ${{ secrets.DOCKERHUB_REPOSITORY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive build metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "versioned_tag=${VERSION}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "sha_tag=sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Test static content
+        run: ./scripts/test.sh
+
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: security/semgrep.yml
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_CONFIG: security/gitleaks.toml
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build container image locally
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          push: false
+          tags: |
+            ${{ env.IMAGE_REPOSITORY }}:${{ steps.meta.outputs.versioned_tag }}
+            ${{ env.IMAGE_REPOSITORY }}:${{ steps.meta.outputs.sha_tag }}
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.IMAGE_REPOSITORY }}:${{ steps.meta.outputs.versioned_tag }}
+          format: table
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_REPOSITORY }}:${{ steps.meta.outputs.versioned_tag }}
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ steps.meta.outputs.versioned_tag }}
+          path: sbom.cdx.json
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push validated image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          provenance: true
+          sbom: true
+          tags: |
+            ${{ env.IMAGE_REPOSITORY }}:${{ steps.meta.outputs.versioned_tag }}
+            ${{ env.IMAGE_REPOSITORY }}:${{ steps.meta.outputs.sha_tag }}
+
+      - name: Install Cosign
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' && secrets.COSIGN_PASSWORD != '' }}
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image with Cosign
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' && secrets.COSIGN_PASSWORD != '' }}
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          printf '%s' "$COSIGN_PRIVATE_KEY" > cosign.key
+          cosign sign --yes --key cosign.key "${IMAGE_REPOSITORY}:${{ steps.meta.outputs.versioned_tag }}"

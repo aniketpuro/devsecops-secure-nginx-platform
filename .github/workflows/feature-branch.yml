@@ -1,0 +1,55 @@
+name: Feature Branch Security Checks
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "bugfix/**"
+      - "hotfix/**"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: feature-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quick-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Test static content
+        run: ./scripts/test.sh
+
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: security/semgrep.yml
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_CONFIG: security/gitleaks.toml
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"

@@ -17,6 +17,7 @@ spec:
       labels:
         app.kubernetes.io/name: devsecops-secure-nginx-platform
         app.kubernetes.io/component: web
+        owner: platform-team
       annotations:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "devsecops-secure-nginx"
@@ -31,6 +32,9 @@ spec:
       serviceAccountName: secure-nginx-sa
       automountServiceAccountToken: false
       securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
         seccompProfile:
           type: RuntimeDefault
       containers:

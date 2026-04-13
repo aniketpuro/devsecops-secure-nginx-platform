@@ -15,4 +15,5 @@ app.kubernetes.io/name: {{ include "devsecops-secure-nginx-platform.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+owner: platform-team
 {{- end -}}

@@ -24,6 +24,9 @@ service:
   targetPort: 8080
 
 podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
   seccompProfile:
     type: RuntimeDefault
 

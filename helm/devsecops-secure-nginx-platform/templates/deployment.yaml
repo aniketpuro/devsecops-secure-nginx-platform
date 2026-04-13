@@ -15,6 +15,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "devsecops-secure-nginx-platform.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        owner: platform-team
       annotations:
         {{- if .Values.vault.enabled }}
         vault.hashicorp.com/agent-inject: "true"

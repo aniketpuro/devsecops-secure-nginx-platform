@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Secure delivery project for the NGINX platform
   sourceRepos:
-    - http://host.docker.internal:8000/devsecops-secure-nginx-platform.git
+    - git://host.docker.internal/devsecops-secure-nginx-platform.git
   destinations:
     - namespace: devsecops-secure-nginx
       server: https://kubernetes.default.svc

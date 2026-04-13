@@ -6,7 +6,7 @@ metadata:
 spec:
   project: devsecops-platform
   source:
-    repoURL: http://host.docker.internal:8000/devsecops-secure-nginx-platform.git
+    repoURL: git://host.docker.internal/devsecops-secure-nginx-platform.git
     targetRevision: main
     path: helm/devsecops-secure-nginx-platform
     helm:

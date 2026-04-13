@@ -1,0 +1,8 @@
+﻿NAME                                                      ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+k8sblockroot.constraints.gatekeeper.sh/enforce-non-root                        19
+
+NAME                                                                 ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+k8snoprivileged.constraints.gatekeeper.sh/no-privileged-containers                        1
+
+NAME                                                          ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+k8srequiredlabels.constraints.gatekeeper.sh/must-have-owner                        26

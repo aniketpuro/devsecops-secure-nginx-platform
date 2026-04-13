@@ -1,0 +1,4 @@
+﻿NAME                AGE
+k8sblockroot        21h
+k8snoprivileged     21h
+k8srequiredlabels   21h

@@ -1,0 +1,302 @@
+﻿apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"argoproj.io/v1alpha1","kind":"Application","metadata":{"annotations":{},"name":"devsecops-secure-nginx-platform","namespace":"argocd"},"spec":{"destination":{"namespace":"devsecops-secure-nginx","server":"https://kubernetes.default.svc"},"project":"devsecops-platform","revisionHistoryLimit":10,"source":{"helm":{"valueFiles":["values.yaml"]},"path":"helm/devsecops-secure-nginx-platform","repoURL":"git://host.docker.internal/devsecops-secure-nginx-platform.git","targetRevision":"main"},"syncPolicy":{"automated":{"allowEmpty":false,"prune":true,"selfHeal":true},"syncOptions":["CreateNamespace=true","RespectIgnoreDifferences=true","PrunePropagationPolicy=foreground","ApplyOutOfSyncOnly=true"]}}}
+  creationTimestamp: "2026-04-13T10:03:28Z"
+  generation: 27
+  name: devsecops-secure-nginx-platform
+  namespace: argocd
+  resourceVersion: "115573"
+  uid: 2003cfe0-2e58-4b69-855d-22d7be2d6c9e
+spec:
+  destination:
+    namespace: devsecops-secure-nginx
+    server: https://kubernetes.default.svc
+  project: devsecops-platform
+  revisionHistoryLimit: 10
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+    path: helm/devsecops-secure-nginx-platform
+    repoURL: git://host.docker.internal/devsecops-secure-nginx-platform.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - RespectIgnoreDifferences=true
+    - PrunePropagationPolicy=foreground
+    - ApplyOutOfSyncOnly=true
+status:
+  controllerNamespace: argocd
+  health:
+    lastTransitionTime: "2026-04-13T10:05:27Z"
+    status: Healthy
+  history:
+  - deployStartedAt: "2026-04-13T10:05:03Z"
+    deployedAt: "2026-04-13T10:06:59Z"
+    id: 0
+    initiatedBy:
+      automated: true
+    revision: 6c0b2c84ae237064b365bd31c28d768c32086e96
+    source:
+      helm:
+        valueFiles:
+        - values.yaml
+      path: helm/devsecops-secure-nginx-platform
+      repoURL: git://host.docker.internal/devsecops-secure-nginx-platform.git
+      targetRevision: main
+  operationState:
+    finishedAt: "2026-04-13T10:05:07Z"
+    message: successfully synced (all tasks run)
+    operation:
+      initiatedBy:
+        automated: true
+      retry:
+        limit: 5
+      sync:
+        prune: true
+        revision: 6c0b2c84ae237064b365bd31c28d768c32086e96
+        source:
+          helm:
+            valueFiles:
+            - values.yaml
+          path: helm/devsecops-secure-nginx-platform
+          repoURL: git://host.docker.internal/devsecops-secure-nginx-platform.git
+          targetRevision: main
+        syncOptions:
+        - CreateNamespace=true
+        - RespectIgnoreDifferences=true
+        - PrunePropagationPolicy=foreground
+        - ApplyOutOfSyncOnly=true
+    phase: Succeeded
+    startedAt: "2026-04-13T10:05:03Z"
+    syncResult:
+      resources:
+      - group: ""
+        hookPhase: Running
+        kind: Namespace
+        message: namespace/devsecops-secure-nginx created
+        name: devsecops-secure-nginx
+        namespace: ""
+        status: Synced
+        syncPhase: PreSync
+        version: v1
+      - group: networking.k8s.io
+        hookPhase: Running
+        kind: NetworkPolicy
+        message: networkpolicy.networking.k8s.io/allow-monitoring-scrape created
+        name: allow-monitoring-scrape
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: networking.k8s.io
+        hookPhase: Running
+        kind: NetworkPolicy
+        message: networkpolicy.networking.k8s.io/default-deny-all created
+        name: default-deny-all
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: networking.k8s.io
+        hookPhase: Running
+        kind: NetworkPolicy
+        message: networkpolicy.networking.k8s.io/allow-ingress-controller-to-nginx
+          created
+        name: allow-ingress-controller-to-nginx
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: policy
+        hookPhase: Running
+        kind: PodDisruptionBudget
+        message: poddisruptionbudget.policy/devsecops-secure-nginx-platform created
+        name: devsecops-secure-nginx-platform
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: ServiceAccount
+        message: serviceaccount/secure-nginx-sa created
+        name: secure-nginx-sa
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: ConfigMap
+        message: configmap/secure-nginx-config created
+        name: secure-nginx-config
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: Role
+        message: "role.rbac.authorization.k8s.io/devsecops-secure-nginx-platform-role
+          reconciled. reconciliation required create\n\tmissing rules added:\n\t\t{Verbs:[get]
+          APIGroups:[] Resources:[configmaps] ResourceNames:[secure-nginx-config]
+          NonResourceURLs:[]}. role.rbac.authorization.k8s.io/devsecops-secure-nginx-platform-role
+          configured. Warning: resource roles/devsecops-secure-nginx-platform-role
+          is missing the kubectl.kubernetes.io/last-applied-configuration annotation
+          which is required by  apply.  apply should only be used on resources created
+          declaratively by either  create --save-config or  apply. The missing annotation
+          will be patched automatically."
+        name: devsecops-secure-nginx-platform-role
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: rbac.authorization.k8s.io
+        hookPhase: Running
+        kind: RoleBinding
+        message: "rolebinding.rbac.authorization.k8s.io/devsecops-secure-nginx-platform-rolebinding
+          reconciled. reconciliation required create\n\tmissing subjects added:\n\t\t{Kind:ServiceAccount
+          APIGroup: Name:secure-nginx-sa Namespace:}. rolebinding.rbac.authorization.k8s.io/devsecops-secure-nginx-platform-rolebinding
+          configured. Warning: resource rolebindings/devsecops-secure-nginx-platform-rolebinding
+          is missing the kubectl.kubernetes.io/last-applied-configuration annotation
+          which is required by  apply.  apply should only be used on resources created
+          declaratively by either  create --save-config or  apply. The missing annotation
+          will be patched automatically."
+        name: devsecops-secure-nginx-platform-rolebinding
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: ""
+        hookPhase: Running
+        kind: Service
+        message: service/devsecops-secure-nginx-platform created
+        name: devsecops-secure-nginx-platform
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: apps
+        hookPhase: Running
+        images:
+        - devsecops-secure-nginx-platform:local
+        - nginx/nginx-prometheus-exporter:1.3.0
+        kind: Deployment
+        message: deployment.apps/devsecops-secure-nginx-platform created
+        name: devsecops-secure-nginx-platform
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      - group: monitoring.coreos.com
+        hookPhase: Running
+        kind: ServiceMonitor
+        message: servicemonitor.monitoring.coreos.com/devsecops-secure-nginx-platform
+          created
+        name: devsecops-secure-nginx-platform
+        namespace: devsecops-secure-nginx
+        status: Synced
+        syncPhase: Sync
+        version: v1
+      revision: 6c0b2c84ae237064b365bd31c28d768c32086e96
+      source:
+        helm:
+          valueFiles:
+          - values.yaml
+        path: helm/devsecops-secure-nginx-platform
+        repoURL: git://host.docker.internal/devsecops-secure-nginx-platform.git
+        targetRevision: main
+  reconciledAt: "2026-04-13T10:30:49Z"
+  resourceHealthSource: appTree
+  resources:
+  - kind: ConfigMap
+    name: secure-nginx-config
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - kind: Service
+    name: devsecops-secure-nginx-platform
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - kind: ServiceAccount
+    name: secure-nginx-sa
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: apps
+    kind: Deployment
+    name: devsecops-secure-nginx-platform
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: monitoring.coreos.com
+    kind: ServiceMonitor
+    name: devsecops-secure-nginx-platform
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: networking.k8s.io
+    kind: NetworkPolicy
+    name: allow-ingress-controller-to-nginx
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: networking.k8s.io
+    kind: NetworkPolicy
+    name: allow-monitoring-scrape
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: networking.k8s.io
+    kind: NetworkPolicy
+    name: default-deny-all
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: policy
+    kind: PodDisruptionBudget
+    name: devsecops-secure-nginx-platform
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: Role
+    name: devsecops-secure-nginx-platform-role
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: devsecops-secure-nginx-platform-rolebinding
+    namespace: devsecops-secure-nginx
+    status: Synced
+    version: v1
+  sourceHydrator: {}
+  sourceType: Helm
+  summary:
+    images:
+    - devsecops-secure-nginx-platform:local
+    - nginx/nginx-prometheus-exporter:1.3.0
+  sync:
+    comparedTo:
+      destination:
+        namespace: devsecops-secure-nginx
+        server: https://kubernetes.default.svc
+      source:
+        helm:
+          valueFiles:
+          - values.yaml
+        path: helm/devsecops-secure-nginx-platform
+        repoURL: git://host.docker.internal/devsecops-secure-nginx-platform.git
+        targetRevision: main
+    revision: 6c0b2c84ae237064b365bd31c28d768c32086e96
+    status: Synced

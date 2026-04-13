@@ -257,6 +257,60 @@ The `ServiceMonitor` enables Prometheus scraping for the application. The includ
 
 Load the dashboard JSON from `monitoring/grafana-dashboard-devsecops-secure-nginx-platform.json` into Grafana, or mount it through Grafana sidecar dashboards.
 
+## Deployment Evidence (Ordered Screenshots)
+
+The following screenshots are captured from the local Docker Desktop Kubernetes deployment and are ready to embed in demos, reports, and PR descriptions.
+
+### 1. Argo CD Applications View
+
+![01 Argo CD Applications](artifacts/screenshots/01-argocd-applications.png)
+
+### 2. Argo CD Application Detail (Sync + Health)
+
+![02 Argo CD Application Detail](artifacts/screenshots/02-argocd-app-detail.png)
+
+### 3. Application UI (NGINX Secure Landing Page)
+
+![03 Application Home](artifacts/screenshots/03-app-home.png)
+
+### 4. Grafana Dashboard
+
+![04 Grafana Dashboard](artifacts/screenshots/04-grafana-dashboard.png)
+
+### 5. Prometheus Query Evidence
+
+![05 Prometheus Query](artifacts/screenshots/05-prometheus-query.png)
+
+## Result Artifacts
+
+These text artifacts capture command outputs used as deployment proof:
+
+- `artifacts/results/argocd-apps.txt`
+- `artifacts/results/argocd-app-detail.yaml`
+- `artifacts/results/k8s-workload.txt`
+- `artifacts/results/k8s-networkpolicy.txt`
+- `artifacts/results/gatekeeper-constraints.txt`
+- `artifacts/results/gatekeeper-templates.txt`
+- `artifacts/results/trivy-fs.txt`
+
+## How To Capture These Screenshots Yourself
+
+Use this sequence whenever you need fresh evidence for README or audits:
+
+1. Start port-forward sessions:
+   - `kubectl port-forward -n devsecops-secure-nginx svc/devsecops-secure-nginx-platform 8080:80`
+   - `kubectl port-forward -n argocd svc/argocd-server 8081:443`
+   - `kubectl port-forward -n monitoring svc/monitoring-grafana 3001:80`
+   - `kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9091:9090`
+2. Open endpoints:
+   - App: `http://127.0.0.1:8080`
+   - Argo CD: `https://127.0.0.1:8081`
+   - Grafana: `http://127.0.0.1:3001`
+   - Prometheus: `http://127.0.0.1:9091`
+3. Capture screenshots in the same order used above and store them under `artifacts/screenshots/`.
+4. Capture validation outputs into `artifacts/results/` (for example, `kubectl get ...`, `trivy fs ...`).
+5. Commit both screenshot and result artifacts so README references remain valid.
+
 ## Branch Protection Strategy
 
 Repository administrators should enforce the policy described in `security/github-branch-protection.md`:

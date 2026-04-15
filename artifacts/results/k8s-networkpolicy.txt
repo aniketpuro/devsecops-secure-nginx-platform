@@ -1,4 +1,0 @@
-﻿NAME                                POD-SELECTOR                                             AGE
-allow-ingress-controller-to-nginx   app.kubernetes.io/name=devsecops-secure-nginx-platform   26m
-allow-monitoring-scrape             app.kubernetes.io/name=devsecops-secure-nginx-platform   26m
-default-deny-all                    <none>                                                   26m

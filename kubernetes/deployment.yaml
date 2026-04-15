@@ -89,7 +89,7 @@ spec:
               drop:
                 - ALL
         - name: nginx-exporter
-          image: nginx/nginx-prometheus-exporter:1.3.0
+          image: nginx/nginx-prometheus-exporter:1.5.0
           args:
             - -nginx.scrape-uri=http://127.0.0.1:8080/nginx_status
           ports:

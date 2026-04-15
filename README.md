@@ -115,7 +115,7 @@ Kyverno policies enforce:
 ### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/acme-platform/devsecops-secure-nginx-platform.git
+git clone https://github.com/aniketpuro/devsecops-secure-nginx-platform.git
 cd devsecops-secure-nginx-platform
 ```
 

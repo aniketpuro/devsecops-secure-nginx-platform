@@ -1,4 +1,4 @@
-FROM nginxinc/nginx-unprivileged:1.27-alpine-slim
+FROM nginxinc/nginx-unprivileged:1.29-alpine-slim
 
 LABEL org.opencontainers.image.title="devsecops-secure-nginx-platform" \
       org.opencontainers.image.description="Production-grade hardened NGINX static application" \

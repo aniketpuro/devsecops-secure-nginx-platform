@@ -275,7 +275,8 @@ The following screenshots are captured from the local Docker Desktop Kubernetes 
 
 ### 4. Grafana Dashboard
 
-![04 Grafana Dashboard](artifacts/screenshots/04-grafana-dashboard.png)
+![04 Grafana Dashboard](<img width="1195" height="896" alt="grafama_dashboard" src="https://github.com/user-attachments/assets/4254d8f7-367c-4b1c-909f-6b79904c609e" />
+)
 
 ### 5. Prometheus Query Evidence
 

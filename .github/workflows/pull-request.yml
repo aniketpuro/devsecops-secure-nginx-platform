@@ -28,6 +28,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      # 1. ADDED: Detect changes in specific paths
+      - name: Check for Docker modifications
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docker:
+              - 'docker/**'
+
       - name: Derive build metadata
         id: meta
         run: |
@@ -41,6 +50,7 @@ jobs:
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
 
+      # Note: FS scan runs on all PRs to catch vulnerable app dependencies (like requirements.txt)
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
@@ -51,10 +61,14 @@ jobs:
           format: table
           exit-code: "1"
 
+      # 2. ADDED: "if" condition to Docker setup
       - name: Set up Docker Buildx
+        if: steps.filter.outputs.docker == 'true'
         uses: docker/setup-buildx-action@v3
 
+      # 3. ADDED: "if" condition to Docker build
       - name: Build container image
+        if: steps.filter.outputs.docker == 'true'
         uses: docker/build-push-action@v6.13.0
         with:
           context: .
@@ -65,7 +79,9 @@ jobs:
             local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.image_tag }}
             local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.short_sha }}
 
+      # 4. ADDED: "if" condition to Trivy image scan
       - name: Run Trivy image scan
+        if: steps.filter.outputs.docker == 'true'
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           image-ref: local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.image_tag }}

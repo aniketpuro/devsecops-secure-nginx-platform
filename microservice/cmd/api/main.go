@@ -3,11 +3,8 @@ package main
 import (
     "log"
 
-    "github.com/aniketpuro/devsecops-secure-nginx-platform/microservice/internal/config"
-    "github.com/aniketpuro/devsecops-secure-nginx-platform/microservice/internal/handler"
-    "github.com/aniketpuro/devsecops-secure-nginx-platform/microservice/internal/middleware"
-    "github.com/gin-gonic/gin"
-    "github.com/prometheus/client_golang/prometheus/promhttp"
+    "secure-identity-service/internal/config"
+    "secure-identity-service/pkg/jwt"
 )
 
 func main() {

@@ -4,7 +4,11 @@ import (
     "log"
     "time"
 
-    "github.com/spf13/viper"
+    "github.com/aniketpuro/secure-identity-service/internal/config"
+    "github.com/aniketpuro/secure-identity-service/internal/handler"
+    "github.com/aniketpuro/secure-identity-service/internal/middleware"
+    "github.com/gin-gonic/gin"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Config struct {

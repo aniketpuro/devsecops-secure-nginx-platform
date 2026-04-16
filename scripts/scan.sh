@@ -17,7 +17,7 @@ if ! command -v trivy >/dev/null 2>&1; then
 fi
 
 echo "Running static tests..."
-./scripts/test.sh
+chmod +x ./scripts/test.sh
 
 echo "Running Semgrep..."
 semgrep --config security/semgrep.yml

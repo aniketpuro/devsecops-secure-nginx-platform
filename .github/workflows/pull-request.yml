@@ -50,6 +50,8 @@ jobs:
 
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@0.28.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           scan-type: fs
           scan-ref: .
@@ -87,6 +89,8 @@ jobs:
 
       - name: Run Trivy image scan
         uses: aquasecurity/trivy-action@0.28.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           image-ref: local/devsecops-secure-nginx-platform:${{ steps.meta.outputs.image_tag }}
           format: table

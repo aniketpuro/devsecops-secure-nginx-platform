@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: devsecops-secure-nginx-platform
+  namespace: devsecops-secure-nginx
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: devsecops-secure-nginx-platform
+  namespaceSelector:
+    matchNames:
+      - devsecops-secure-nginx
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

@@ -7,3 +7,4 @@ coverage/
 sbom/
 tmp/
 *.log
+microservice\.env

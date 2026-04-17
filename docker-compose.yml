@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # 1. Message Queue (RabbitMQ)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: secure-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: securepass123
+    networks:
+      - devsecops-net
+    restart: unless-stopped
+
+  # 2. Database (MongoDB)
+  mongodb:
+    image: mongo:6.0
+    container_name: secure-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: securepass123
+    networks:
+      - devsecops-net
+    restart: unless-stopped
+
+  # 3. Identity Service (Go)
+  identity-service:
+    build: 
+      context: ./services/identity-service
+    container_name: identity-service
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - JWT_SECRET=my_super_secret_key_123
+      - ENVIRONMENT=development
+    networks:
+      - devsecops-net
+    restart: unless-stopped
+
+  # 4. Converter Service (Python)
+  converter-service:
+    build: 
+      context: ./services/converter-service
+    container_name: converter-service
+    depends_on:
+      - rabbitmq
+      - mongodb
+    networks:
+      - devsecops-net
+    restart: unless-stopped
+
+  gateway:
+    build: 
+      context: ./services/gateway
+    container_name: secure-nginx-gateway
+    ports:
+      - "80:80"   # Humara entry point
+    depends_on:
+      - identity-service
+    networks:
+      - devsecops-net
+    restart: unless-stopped
+
+# Networks sabse aakhiri me aayega, sabse alag
+networks:
+  devsecops-net:
+    driver: bridge
+
+

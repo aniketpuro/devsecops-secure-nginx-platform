@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Package files copy karo
+COPY package*.json ./
+
+# Dependencies install karo
+RUN npm install
+
+# Baaki saara code copy karo
+COPY . .
+
+# Port expose karo
+EXPOSE 3000
+
+# Development mode mein chalao
+CMD ["npm", "run", "dev"]

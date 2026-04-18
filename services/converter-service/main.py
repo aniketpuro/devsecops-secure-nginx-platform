@@ -1,49 +1,62 @@
+from flask import Flask, request, jsonify
 import pika
-import time
+import json
 import os
-from pymongo import MongoClient
+import time
+from moviepy.editor import VideoFileClip
 
-print("Starting Converter Service...")
-time.sleep(15) # Wait for RabbitMQ and MongoDB to fully start
+app = Flask(__name__)
 
-# 1. Connect to MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:securepass123@mongodb:27017/")
-client = MongoClient(MONGO_URI)
-db = client.mp3_converter
-tasks_collection = db.tasks
-print("Connected to MongoDB!")
-
-# 2. Connect to RabbitMQ
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq")
-credentials = pika.PlainCredentials('admin', 'securepass123')
-connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST, credentials=credentials))
-channel = connection.channel()
+UPLOAD_FOLDER = "/app/uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Queue banate hain agar nahi hai toh
-channel.queue_declare(queue='mp3_tasks', durable=True)
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy", "service": "converter-service"})
 
-# 3. Message aane par kya karna hai (Callback Function)
-def callback(ch, method, properties, body):
-    task_id = body.decode()
-    print(f" [x] Received MP3 Conversion Task: {task_id}")
+@app.route('/convert', methods=['POST'])
+def convert_video():
+    if 'video' not in request.files:
+        return jsonify({"error": "No video file"}), 400
     
-    # DB me status 'processing' kardo
-    tasks_collection.update_one({"task_id": task_id}, {"$set": {"status": "processing"}}, upsert=True)
-    
-    # Yahan baad me asli MP3 conversion code aayega (FFmpeg wala)
-    print("     -> Converting file... (Simulating 5 seconds work)")
-    time.sleep(5) 
-    
-    # DB me status 'completed' kardo
-    tasks_collection.update_one({"task_id": task_id}, {"$set": {"status": "completed"}})
-    print(f" [x] Finished Task: {task_id}")
-    
-    # RabbitMQ ko bata do ki task ho gaya
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+    file = request.files['video']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-# 4. Sunna shuru karo (Listening mode)
-channel.basic_qos(prefetch_count=1)
-channel.basic_consume(queue='mp3_tasks', on_message_callback=callback)
+    filename = file.filename
+    video_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(video_path)
 
-print(' [*] Waiting for tasks. To exit press CTRL+C')
-channel.start_consuming()
+    try:
+        # Video to MP3 conversion
+        video = VideoFileClip(video_path)
+        mp3_filename = filename.rsplit('.', 1)[0] + ".mp3"
+        mp3_path = os.path.join(UPLOAD_FOLDER, mp3_filename)
+        
+        video.audio.write_audiofile(mp3_path)
+        video.close()
+
+        # RabbitMQ pe notification bhejo
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=RABBITMQ_HOST))
+        channel = connection.channel()
+        channel.queue_declare(queue='conversion_complete', durable=True)
+        
+        message = {
+            "email": "user@example.com",   # baad mein real user email aayega
+            "filename": mp3_filename,
+            "download_link": f"http://localhost:3000/download/{mp3_filename}"
+        }
+        channel.basic_publish(exchange='', routing_key='conversion_complete', body=json.dumps(message))
+        connection.close()
+
+        return jsonify({
+            "message": "Conversion started",
+            "mp3_filename": mp3_filename
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)

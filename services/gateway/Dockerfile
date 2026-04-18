@@ -1,8 +1,10 @@
 FROM nginx:alpine
 
+# Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
-# COPY conf.d/ /etc/nginx/conf.d/
 
+# Expose port
 EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"] 
+# Run nginx in foreground
+CMD ["nginx", "-g", "daemon off;"]

@@ -30,7 +30,7 @@ jobs:
 
       # 1. ADDED: Detect changes in specific paths
       - name: Check for Docker modifications
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
